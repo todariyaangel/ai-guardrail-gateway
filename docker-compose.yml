@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  # The Redis In-Memory Cache Database Layer
+  redis-cache:
+    image: redis:7-alpine
+    container_name: gateway-redis-db
+    ports:
+      - "6379:6379"
+    restart: always
+
+  # Your Custom FastAPI AI Guardrail Proxy Layer
+  api-gateway:
+    build: .
+    container_name: ai-guardrail-proxy
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    depends_on:
+      - redis-cache
+    restart: always
