@@ -3,10 +3,7 @@ from main import app
 
 client = TestClient(app)
 
-# We define the security headers your main.py is looking for
-HEADERS = {
-    "X-Gateway-Team-ID": "engineering-alpha"
-}
+HEADERS = {"X-Gateway-Team-ID": "engineering-alpha"}
 
 def test_clean_prompt_passes():
     response = client.post(
@@ -34,6 +31,3 @@ def test_pii_redaction_works():
     assert response.status_code == 200
     assert "[REDACTED_EMAIL]" in response.json()["sanitized_prompt"]
     assert "[REDACTED_PHONE]" in response.json()["sanitized_prompt"]
-
-
-
