@@ -3,6 +3,7 @@ from main import app
 
 client = TestClient(app)
 
+# Match the explicit header configuration mapping
 HEADERS = {"X-Gateway-Team-ID": "engineering-alpha"}
 
 def test_clean_prompt_passes():
