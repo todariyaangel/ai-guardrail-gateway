@@ -10,7 +10,6 @@ jobs:
   security-stress-test:
     runs-on: ubuntu-latest
 
-    # This boots up a live Redis server inside your cloud environment
     services:
       redis:
         image: redis
@@ -37,5 +36,8 @@ jobs:
         pip install -r requirements.txt pytest httpx
 
     - name: Run Automated Guardrail Tests
+      env:
+        # Crucial link: maps python requests to the live background service container
+        REDIS_HOST: localhost
       run: |
         python -m pytest test_gateway.py
