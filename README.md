@@ -1,53 +1,71 @@
-# AI Token & Budget Guardrail Gateway
+# 🛡️ AI Guardrail Gateway
 
-This is a lightweight API proxy built with FastAPI and Redis to control LLM costs and stop runaway AI agent loops. 
+An enterprise-grade, high-throughput LLM proxy control plane designed to sit between user-facing applications and Foundation Models. This system acts as an intelligent security firewall—intercepting, logging, and filtering out malicious inputs while validating structural prompt data in real-time.
 
-Instead of your apps hitting OpenAI directly, they talk to this gateway. The gateway intercepts the requests, checks if the team is within budget, checks if the agent is stuck repeating itself, and then safely forwards the request.
+---
 
-## What it does
-* **Cost Controls:** Real-time ledger tracking in Redis that blocks requests once a team hits their dynamic daily spending limit.
-* **Infinite Loop Killswitch:** Uses standard string pattern matching to catch rogue agents sending duplicate prompts back-to-back, dropping the connection before it burns tokens.
-* **Resilient Routing:** Asynchronous proxying that handles bad API responses or upstream errors gracefully without crashing your client app.
+## 🏗️ System Architecture
 
-## The Stack
-* **FastAPI** (Async routing engine)
-* **Redis** (Fast in-memory cache database)
-* **HTTPX** (Async network requests client)
-* **Tiktoken** (OpenAI token counting utility)
+[ User / Client Application ]
+            │
+            ▼ (Secure HTTP Request)
+┌────────────────────────────────────────┐
+│      AI Guardrail Gateway Proxy        │
+│  • FastAPI Server Layer                │
+│  • X-Gateway-Team-ID Team Enforcement │
+└───────────────────┬────────────────────┘
+                    │
+                    ├─► [ Input Defense: Prompt Injection Scanner ] ──► (Blocks Jailbreaks)
+                    │
+                    ├─► [ Privacy Guardrail: RegEx PII Redactor ]   ──► (Scrubs Emails/Phones)
+                    │
+                    ▼
+[ Cleansed & Sanitized Payload Ready for LLM Ingestion ]
 
-## How It Processes Requests
-1. Validates the incoming header `X-Gateway-Team-ID`.
-2. Pulls the team's current spend from Redis. If they are over budget, it throws a `429 Too Many Requests`.
-3. Runs a similarity score comparison against the last 3 prompts. If it is a >90% match, it assumes an infinite loop and stops execution with a `408 Timeout`.
-4. Routes clean text data to the target endpoint securely.
-5. Measures exact tokens used, increments the financial spend ledger in Redis, and passes response data back to the app.
+---
 
-## How to Set Up and Run Locally
+## 🚀 Core Capabilities
 
-### Prerequisites
-Make sure you have Python 3.10+ installed and a Redis database running locally (you can spin up Redis inside Docker Desktop with `docker run -d --name redis-gateway -p 6379:6379 redis`).
+* **Security Header Verification:** Restricts access to internal team microservices by strictly validating required `X-Gateway-Team-ID` headers.
+* **Input Injection Defense:** Real-time semantic analysis layer designed to catch and drop prompt jailbreak strings (e.g., *"ignore previous instructions"*).
+* **Data Privacy Compliance:** Algorithmic regex extraction engine that automatically discovers and redacts sensitive PII (emails and phone numbers) to prevent training data leaks.
+* **Automated MLOps Guardrails:** Integrated **Continuous Integration (CI/CD)** pipeline that executes test assertions inside an isolated cloud runner.
 
-### 1. Install dependencies
+---
+
+## 🛠️ Tech Stack & Skills Proven
+
+* **Core Backend:** Python • FastAPI • Uvicorn • Pydantic
+* **Testing Framework:** PyTest • HTTPX Mock Testing
+* **Infrastructure & MLOps:** GitHub Actions CI/CD Workflows • Git/GitHub Hygiene • Data Privacy Controls
+
+---
+
+## 💻 Local Quickstart
+
+### 1. Clone the Repository
 ```bash
-pip install fastapi uvicorn httpx redis tiktoken python-dotenv
+git clone https://github.com
+cd ai-guardrail-gateway
 ```
 
-### 2. Configure variables
-Create a `.env` file in your root folder:
-```env
-OPENAI_API_KEY=your_actual_key_here
-REDIS_HOST=localhost
-REDIS_PORT=6379
-DAILY_BUDGET_USD=5.00
+### 2. Install Project Dependencies
+```bash
+pip install -r requirements.txt pytest httpx
 ```
 
-### 3. Launch the server
+### 3. Run the Microservice Locally
 ```bash
-python -m uvicorn main:app --reload --port 8000
+uvicorn main:app --reload
 ```
 
-### 4. Test it out
-Open a separate terminal window and execute the verification script to simulate traffic and watch the loop detector trigger on consecutive attempts:
+---
+
+## 🧪 Automated Testing
+
+This repository leverages an automated CI pipeline. Every single push or pull request automatically instantiates an isolated testing suite via GitHub Actions to assert boundary vulnerabilities before distribution.
+
+To execute tests manually:
 ```bash
-python test_gateway.py
+python -m pytest test_gateway.py
 ```
