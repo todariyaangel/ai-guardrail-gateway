@@ -1,5 +1,13 @@
 from fastapi.testclient import TestClient
 from main import app
+from fastapi import FastAPI, HTTPException, Header
+from pydantic import BaseModel
+import re
+from typing import Optional
+
+app = FastAPI(title="AI Guardrail Gateway")
+# ... the rest of the clean code stays below
+
 
 client = TestClient(app)
 HEADERS = {"X-Gateway-Team-ID": "engineering-alpha"}
