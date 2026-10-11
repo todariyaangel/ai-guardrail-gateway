@@ -10,6 +10,18 @@ jobs:
   security-stress-test:
     runs-on: ubuntu-latest
 
+    # This boots up a live Redis server inside your cloud environment
+    services:
+      redis:
+        image: redis
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
     - name: Checkout Code
       uses: actions/checkout@v4
@@ -27,6 +39,3 @@ jobs:
     - name: Run Automated Guardrail Tests
       run: |
         python -m pytest test_gateway.py
-
-
-   
