@@ -1,13 +1,5 @@
 from fastapi.testclient import TestClient
-from unittest.mock import MagicMock
-from main import app, get_redis
-
-# 1. Create a clean mock structure 
-mock_redis = MagicMock()
-mock_redis.ping.return_value = True
-
-# 2. Tell FastAPI to swap out the real function for our fake version during runs
-app.dependency_overrides[get_redis] = lambda: mock_redis
+from main import app
 
 client = TestClient(app)
 HEADERS = {"X-Gateway-Team-ID": "engineering-alpha"}
