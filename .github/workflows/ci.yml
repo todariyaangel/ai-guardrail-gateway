@@ -26,4 +26,4 @@ jobs:
 
     - name: Run Automated Guardrail Tests
       run: |
-        python -m pytest test_gateway.py
+        python -m pytest test_gateway.py -W ignore::DeprecationWarning
