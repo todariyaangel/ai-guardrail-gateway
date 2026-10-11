@@ -1,19 +1,13 @@
 from fastapi.testclient import TestClient
-from unittest.mock import patch, MagicMock
-import sys
+from unittest.mock import MagicMock
+from main import app, get_redis
 
-# 1. Inject a fake mock for redis before importing main to catch the connection call
-mock_redis_module = MagicMock()
-mock_redis_instance = MagicMock()
-mock_redis_module.Redis.return_value = mock_redis_instance
+# 1. Create a clean mock structure 
+mock_redis = MagicMock()
+mock_redis.ping.return_value = True
 
-# Mock the ping() method to return True successfully
-mock_redis_instance.ping.return_value = True
-
-sys.modules['redis'] = mock_redis_module
-
-# 2. Now safely import your app with the mock active
-from main import app
+# 2. Tell FastAPI to swap out the real function for our fake version during runs
+app.dependency_overrides[get_redis] = lambda: mock_redis
 
 client = TestClient(app)
 HEADERS = {"X-Gateway-Team-ID": "engineering-alpha"}
@@ -44,4 +38,3 @@ def test_pii_redaction_works():
     assert response.status_code == 200
     assert "[REDACTED_EMAIL]" in response.json()["sanitized_prompt"]
     assert "[REDACTED_PHONE]" in response.json()["sanitized_prompt"]
-
